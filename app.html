@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sander Math - the app</title>
+<style>
+  :root { --accent: #4a5a6e; }
+  * { box-sizing: border-box; }
+  body { font-family: Georgia, serif; max-width: 44em; margin: 2em auto; padding: 0 1em; color: #222; background: #fbfaf7; }
+  h1 { color: var(--accent); margin-bottom: 0.1em; }
+  .tag { color: var(--accent); font-style: italic; margin-top: 0; }
+  .card { background: #fff; border: 1px solid #ddd; border-left: 4px solid var(--accent); border-radius: 6px; padding: 1em 1.2em; margin: 1.2em 0; }
+  h3 { margin-top: 0; }
+  label { display: block; font-size: 0.9em; font-weight: 600; margin: 0.7em 0 0.2em; }
+  input { width: 100%; max-width: 12em; padding: 0.4em 0.5em; font-size: 1em; border: 1px solid #bbb; border-radius: 4px; background: #f4f3ef; }
+  .big { font-weight: 600; color: var(--accent); line-height: 1.45; margin-top: 0.9em; }
+  .err { color: #a33; }
+  a { color: var(--accent); }
+  .foot { margin-top: 2.5em; font-size: 0.85em; color: #777; }
+</style>
+</head>
+<body>
+<h1>Sander Math</h1>
+<p class="tag">Grit truth, disc truth and afternoon truth - labeled norms, honest arithmetic.</p>
+
+<div class="card">
+  <h3>The grit truth</h3>
+  <label for="g-start">Start grit</label>
+  <input id="g-start" type="number" step="any" value="60">
+  <label for="g-end">Finish grit</label>
+  <input id="g-end" type="number" step="any" value="220">
+  <p class="big" id="g-out"></p>
+</div>
+
+<div class="card">
+  <h3>The disc truth</h3>
+  <label for="d-sqft">Job size (square feet)</label>
+  <input id="d-sqft" type="number" step="any" value="120">
+  <label for="d-grit">Grit you will spend the most time on</label>
+  <input id="d-grit" type="number" step="any" value="60">
+  <p class="big" id="d-out"></p>
+</div>
+
+<div class="card">
+  <h3>The afternoon truth</h3>
+  <label for="a-sqft">Job size (square feet)</label>
+  <input id="a-sqft" type="number" step="any" value="30">
+  <label for="a-passes">Passes (from the grit truth)</label>
+  <input id="a-passes" type="number" step="any" value="2">
+  <p class="big" id="a-out"></p>
+</div>
+
+<p class="foot">The grit ladder, the sqft-per-disc norms and the 0.8 square-feet-a-minute norm are labeled norms - the arithmetic is honest, and the last pass at dusk keeps the honest ledger.</p>
+
+<script src="engine.js"></script>
+<script>
+function g(id){ return document.getElementById(id); }
+function v(id){ return parseFloat(g(id).value); }
+function show(id, msg, isErr){ var el = g(id); el.textContent = msg; el.className = isErr ? "err big" : "big"; }
+
+function runGrit(){
+  var args = [v("g-start"), v("g-end")];
+  var r = SanderMath.gritPlan.apply(null, args);
+  if (r.error) return show("g-out", r.error, true);
+  show("g-out", SanderMath.renderGrit.apply(null, [r].concat(args)), false);
+}
+function runDisc(){
+  var args = [v("d-sqft"), v("d-grit")];
+  var r = SanderMath.discPlan.apply(null, args);
+  if (r.error) return show("d-out", r.error, true);
+  show("d-out", SanderMath.renderDisc.apply(null, [r].concat(args)), false);
+}
+function runAfternoon(){
+  var args = [v("a-sqft"), v("a-passes")];
+  var r = SanderMath.afternoonPlan.apply(null, args);
+  if (r.error) return show("a-out", r.error, true);
+  show("a-out", SanderMath.renderAfternoon.apply(null, [r].concat(args)), false);
+}
+
+["g-start","g-end"].forEach(function(id){ g(id).addEventListener("input", runGrit); });
+["d-sqft","d-grit"].forEach(function(id){ g(id).addEventListener("input", runDisc); });
+["a-sqft","a-passes"].forEach(function(id){ g(id).addEventListener("input", runAfternoon); });
+runGrit(); runDisc(); runAfternoon();
+</script>
+</body>
+</html>
